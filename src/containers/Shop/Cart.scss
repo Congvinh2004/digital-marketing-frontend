@@ -1,0 +1,181 @@
+.home-body-cart {
+    width      : 85vw;
+    margin     : auto;
+    padding-top: 20px;
+
+    .cart-title-container {
+        width : 100%;
+        height: 70px;
+
+        .cart-title-container {
+            width           : 100%;
+            height          : 70px;
+            display         : flex;
+            justify-content : center;
+            align-items     : center;
+            text-transform  : uppercase;
+            font-size       : 30px;
+            font-weight     : 650;
+            background-color: #efeded;
+
+            .fa-shopping-cart {
+                padding-left: 10px;
+            }
+        }
+    }
+
+    .cart-detail-container {
+        border-left : 1px solid #ddd;
+        border-right: 1px solid #ddd;
+        min-height: 200px;
+
+        .empty-cart-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+
+            p {
+                font-size: 18px;
+                color: #666;
+                margin-bottom: 20px;
+            }
+
+            .btn-continue-shopping {
+                padding: 12px 30px;
+                background-color: #80B500;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: opacity 0.3s ease;
+
+                &:hover {
+                    opacity: 0.9;
+                }
+            }
+        }
+
+        .cart-detail {
+            padding        : 10px 0;
+            display        : flex;
+            flex-direction : row;
+            align-items    : center;
+            justify-content: space-around;
+            padding        : 10px 0;
+            border-bottom  : 1px solid #ddd;
+
+            .cart-product-remove {
+                padding: 10px;
+                cursor : pointer;
+            }
+
+            .cart-product-image {
+                height: 100px;
+                width : 100px;
+            }
+
+            .cart-product-info {}
+
+            .block-container {
+                cursor             : pointer;
+                display            : flex;
+                justify-content    : space-between;
+                // background-color: #f0f0f0;
+
+                .block-item {
+                    text-align     : center;
+                    font-size      : 14px;
+                    height         : 40px;
+                    display        : flex;
+                    align-items    : center;
+                    justify-content: center;
+                    border         : 1px solid #ccc;
+                }
+
+                .item-left {
+                    width: 25px;
+
+                    &:hover {
+                        background-color: #f0f0f0;
+                    }
+                }
+
+                .item-middle {
+                    width: 35px;
+
+                }
+
+                .item-right {
+                    width: 25px;
+
+                    &:hover {
+                        background-color: #f0f0f0;
+                    }
+                }
+            }
+
+            .cart-product-subtotal {
+                .total-price {
+                    font-weight: 650;
+                }
+            }
+
+        }
+    }
+
+    .shoping-cart-total-container {
+        display           : flex;
+        flex-direction    : column;
+        /* align-content  : center; */
+        /* justify-content: flex-end; */
+        align-items       : flex-end;
+        margin-top        : 50px;
+
+        .cart-total-body {
+            margin-top: 20px;
+
+            .cart-total-content {
+                display       : flex;
+                flex-direction: column;
+
+                .detail-total-price {
+                    display         : flex;
+                    flex-direction  : row;
+                    justify-content : space-between;
+                    grid-gap        : 200px;
+                    grid-gap        : 200px;
+                    gap             : 200px;
+                    padding         : 10px 21px 11px 10px;
+                    border-bottom   : 1px solid #ddd;
+                    background-color: #f7f3f3;
+                }
+            }
+        }
+
+        .btn-order {
+            width           : 100%;
+            text-align      : center;
+            height          : 20px;
+            background-color: #80B500;
+            display         : flex;
+            align-items     : center;
+            height          : 50px;
+            justify-content : center;
+            cursor          : pointer;
+
+            &:hover {
+                opacity: 0.9;
+            }
+
+            span {
+                font-weight: 600;
+                color      : white;
+            }
+        }
+    }
+}

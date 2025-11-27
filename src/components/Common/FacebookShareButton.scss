@@ -1,0 +1,33 @@
+.facebook-share-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #1877f2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background: #166fe5;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(24, 119, 242, 0.3);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+
+    i {
+        font-size: 18px;
+    }
+
+    span {
+        font-size: 14px;
+    }
+}
+

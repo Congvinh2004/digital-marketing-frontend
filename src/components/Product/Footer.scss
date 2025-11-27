@@ -1,0 +1,154 @@
+.col-4 {}
+
+.ltn__footer-area {
+    background-color: #F7F5EB;
+    margin-top      : 100px;
+
+    .footer-container {
+        padding: 60px 0 0 0;
+        height : 100%;
+
+
+        .footer-top-area {
+            .top-footer-content {
+                display       : flex;
+                flex-direction: row;
+
+                .footer-widget {
+                    display       : flex;
+                    flex-direction: column;
+                    align-items   : center;
+
+                    .footer-logo {
+                        .site-logo {
+                            img {
+                                max-width: 150px;
+                                height: auto;
+                                object-fit: contain;
+                            }
+                        }
+                    }
+
+                    .footer-address {
+                        margin-top: 30px;
+
+                        .list-contact {
+                            .item-contact {
+                                margin: 10px 0;
+                            }
+
+                        }
+
+                    }
+
+                    .list-contact-icons {
+                        display       : flex;
+                        flex-direction: row;
+                        gap           : 15px;
+                    }
+                }
+
+                .footer-section {
+                    display       : flex;
+                    flex-direction: column;
+                    align-items   : center;
+                }
+
+                .title-about {
+                    margin-top: 8px;
+                }
+
+                .list-about {
+                    margin-top    : 30px;
+                    display       : flex;
+                    flex-direction: column;
+                    gap           : 20px;
+
+                }
+
+                .footer-newsletter-widget {
+                    display       : flex;
+                    flex-direction: column;
+                    align-items   : center;
+
+                    .footer-newsletter-widget-content {
+
+                        width        : 80%;
+                        margin-bottom: 30px;
+
+                        .footer-title {
+                            margin-top: 8px;
+                        }
+
+                        .footer-newsletter {
+                            display    : flex;
+                            align-items: center;
+                            margin     : 20px 0;
+
+                            .input-email {
+                                margin-bottom: 0;
+                                outline      : none;
+                                border       : 1px solid #ddd;
+                            }
+
+                            .icon-send {
+
+                                width             : 45px;
+                                height            : 45px;
+                                // border         : 1px solid red;
+                                display           : flex;
+                                align-content     : center;
+                                justify-content   : center;
+                                background-color  : #80b500;
+
+                                .fa-paper-plane {
+                                    margin   : 13px 0px;
+                                    font-size: 20px;
+                                    height   : 21px;
+                                }
+                            }
+                        }
+
+                        .payment-title {
+                            margin: 20px 0;
+
+                        }
+
+
+                    }
+
+                }
+
+
+            }
+
+
+        }
+
+        .ltn__copyright-area {
+            height         : 70px;
+            display        : flex;
+            align-items    : center;
+            justify-content: space-around;
+
+
+
+            .copyright-menu-list {
+                display        : flex;
+                justify-content: flex-end;
+                flex-direction : row;
+
+                .copyright-menu-item {
+                    margin     : 0 10px;
+                    font-size  : 15px;
+                    color      : #4b4b4b;
+                    font-weight: 650;
+                }
+            }
+
+
+        }
+
+    }
+
+}

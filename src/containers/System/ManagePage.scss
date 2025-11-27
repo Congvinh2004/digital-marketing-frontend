@@ -1,0 +1,147 @@
+.manage-page-container {
+    display: flex;
+    min-height: 100vh;
+    height: 100vh; // Đảm bảo có chiều cao cố định
+    background-color: #f5f5f5;
+    position: relative;
+    overflow: hidden; // Ngăn scroll ở container cha
+}
+
+.manage-sidebar {
+    width: 250px;
+    background-color: #2c3e50;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+
+    .sidebar-header {
+        padding: 20px;
+        background-color: #1a252f;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+        h3 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+        }
+    }
+
+    .sidebar-menu {
+        flex: 1;
+        padding: 20px 0;
+        overflow-y: auto;
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: rgba(255, 255, 255, 0.8);
+            border-left: 3px solid transparent;
+
+            i {
+                font-size: 18px;
+                width: 20px;
+                text-align: center;
+            }
+
+            span {
+                font-size: 16px;
+                font-weight: 500;
+            }
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: white;
+            }
+
+            &.active {
+                background-color: rgba(4, 170, 109, 0.2);
+                color: white;
+                border-left-color: #04AA6D;
+                font-weight: 600;
+            }
+        }
+    }
+}
+
+.manage-content {
+    flex: 1;
+    margin-left: 250px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0;
+    background-color: #f5f5f5;
+    height: 100vh; // Đảm bảo có chiều cao cố định để scroll hoạt động
+
+    // Override padding của ProductManage, UserManage và CategoryManage
+    .product-container,
+    .user-container,
+    .category-container {
+        padding: 20px;
+        background-color: white;
+        margin: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        min-height: calc(100vh - 40px); // Đảm bảo container có chiều cao tối thiểu
+    }
+}
+
+// Responsive
+@media (max-width: 768px) {
+    .manage-sidebar {
+        width: 200px;
+    }
+
+    .manage-content {
+        margin-left: 200px;
+    }
+}
+
+@media (max-width: 576px) {
+    .manage-sidebar {
+        width: 60px;
+
+        .sidebar-header {
+            h3 {
+                font-size: 14px;
+            }
+        }
+
+        .sidebar-menu {
+            .menu-item {
+                padding: 15px;
+                justify-content: center;
+
+                span {
+                    display: none;
+                }
+
+                i {
+                    font-size: 20px;
+                }
+            }
+        }
+    }
+
+    .manage-content {
+        margin-left: 60px;
+
+        .product-container,
+        .user-container,
+        .category-container {
+            margin: 10px;
+            padding: 15px;
+        }
+    }
+}
+

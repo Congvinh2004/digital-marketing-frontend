@@ -1,0 +1,28 @@
+.product-slider {
+    position: relative;
+}
+
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #333;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    z-index: 1;
+}
+
+.prev-btn {
+    left: -40px; /* Điều chỉnh vị trí nút trái */
+}
+
+.next-btn {
+    right: -40px; /* Điều chỉnh vị trí nút phải */
+}
+
+.slider-btn:hover {
+    background-color: #555;
+}
