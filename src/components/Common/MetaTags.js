@@ -6,6 +6,20 @@ import { createAbsoluteUrl, createAbsoluteImageUrl } from '../../utils/urlHelper
  * Component để quản lý Meta Tags và Open Graph Tags cho SEO và Social Sharing
  */
 class MetaTags extends Component {
+    componentDidMount() {
+        // Force update title ngay khi component mount
+        if (this.props.title) {
+            document.title = this.props.title;
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        // Force update title khi title thay đổi
+        if (this.props.title !== prevProps.title && this.props.title) {
+            document.title = this.props.title;
+        }
+    }
+
     render() {
         const {
             title = 'Sản phẩm',

@@ -97,15 +97,45 @@ class ModalProduct extends Component {
 
     checkValidateInput = () => {
         let isValid = true;
-        let arrInput = ['name', 'description', 'price', 'quantity', 'productCategoryID']
-        for (let i = 0; i < arrInput.length; i++) {
-            if (!this.state[arrInput[i]]) {
-                isValid = false
-                toast.error(`Please input ${arrInput[i]}`)
-                break;
+        
+        // Chỉ validate các trường bắt buộc theo API: productName, price, category_id
+        if (!this.state.name || this.state.name.trim() === '') {
+            isValid = false;
+            toast.error('Vui lòng nhập tên sản phẩm');
+            return isValid;
+        }
+        
+        if (!this.state.price || this.state.price === '') {
+            isValid = false;
+            toast.error('Vui lòng nhập giá sản phẩm');
+            return isValid;
+        }
+        
+        // Validate price >= 0
+        const priceValue = parseFloat(this.state.price);
+        if (isNaN(priceValue) || priceValue < 0) {
+            isValid = false;
+            toast.error('Giá sản phẩm phải >= 0');
+            return isValid;
+        }
+        
+        if (!this.state.productCategoryID || this.state.productCategoryID === '') {
+            isValid = false;
+            toast.error('Vui lòng chọn danh mục');
+            return isValid;
+        }
+        
+        // Validate discount_percent nếu có (0-100)
+        if (this.state.discount_percent && this.state.discount_percent !== '') {
+            const discountValue = parseFloat(this.state.discount_percent);
+            if (isNaN(discountValue) || discountValue < 0 || discountValue > 100) {
+                isValid = false;
+                toast.error('Phần trăm giảm giá phải từ 0 đến 100');
+                return isValid;
             }
         }
-        return isValid
+        
+        return isValid;
     }
 
     listenToEmitter = () => {
@@ -207,18 +237,35 @@ class ModalProduct extends Component {
             }
 
             // Gửi JSON với image là base64 string hoặc URL
+            // Theo API documentation: productName, price, category_id là bắt buộc
+            // description, quantity, image, discount_percent là không bắt buộc (có giá trị mặc định)
             const productData = {
-                productName: this.state.name,
-                description: this.state.description,
+                productName: this.state.name.trim(),
                 price: parseFloat(this.state.price),
-                quantity: parseInt(this.state.quantity),
-                category_id: parseInt(this.state.productCategoryID), // Backend dùng category_id, không phải productCategoryID
-                image: imageData
+                category_id: parseInt(this.state.productCategoryID)
             };
-
-            // Thêm discount_percent nếu có
+            
+            // Thêm các trường không bắt buộc nếu có giá trị
+            if (this.state.description && this.state.description.trim() !== '') {
+                productData.description = this.state.description.trim();
+            }
+            
+            if (this.state.quantity && this.state.quantity !== '') {
+                const quantityValue = parseInt(this.state.quantity);
+                if (!isNaN(quantityValue) && quantityValue >= 0) {
+                    productData.quantity = quantityValue;
+                }
+            }
+            
+            if (imageData && imageData.trim() !== '') {
+                productData.image = imageData;
+            }
+            
             if (this.state.discount_percent && this.state.discount_percent !== '') {
-                productData.discount_percent = parseFloat(this.state.discount_percent);
+                const discountValue = parseFloat(this.state.discount_percent);
+                if (!isNaN(discountValue) && discountValue >= 0 && discountValue <= 100) {
+                    productData.discount_percent = discountValue;
+                }
             }
 
             // Nếu có productData từ props, đây là edit mode
@@ -267,12 +314,12 @@ class ModalProduct extends Component {
                         </div>
 
                         <div className='input-container'>
-                            <label>Description *</label>
+                            <label>Description</label>
                             <input
                                 onChange={(e) => { this.handleOnChange(e, 'description') }}
                                 type='text'
                                 value={description}
-                                placeholder='Enter product description'
+                                placeholder='Enter product description (optional)'
                             />
                         </div>
 
@@ -305,14 +352,17 @@ class ModalProduct extends Component {
                         </div>
 
                         <div className='input-container'>
-                            <label>Quantity *</label>
+                            <label>Quantity</label>
                             <input
                                 onChange={(e) => { this.handleOnChange(e, 'quantity') }}
                                 type='number'
                                 value={quantity}
-                                placeholder='Enter quantity'
+                                placeholder='Enter quantity (default: 0)'
                                 min='0'
                             />
+                            <small className="form-text text-muted">
+                                Số lượng tồn kho (mặc định: 0 nếu không nhập)
+                            </small>
                         </div>
 
                         <div className='input-container'>

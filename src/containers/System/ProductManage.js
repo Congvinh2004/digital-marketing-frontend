@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import "./ProductManage.scss"
-import { getAllProducts, deleteProduct, createNewProductsFromService, updateProduct, addInforProductToMGDB } from "../../services/productService"
+import { getAllProducts, deleteProduct, createNewProductsFromService, updateProduct } from "../../services/productService"
 import { getAllCategories } from "../../services/categoryService"
 import ModalProduct from './ModalProduct';
+import NotificationModal from '../../components/Common/NotificationModal';
 import { emitter } from '../../utils/emitter'
 import { toast } from 'react-toastify';
 
@@ -19,7 +20,18 @@ class ProductManage extends Component {
             currentProduct: null, // Product đang được edit
             searchTerm: '', // Từ khóa tìm kiếm
             selectedCategoryFilter: '', // Category được chọn để filter
-            listCategories: [] // Danh sách categories
+            listCategories: [], // Danh sách categories
+            // Notification modal state
+            notificationModal: {
+                isOpen: false,
+                type: 'success', // success, confirm, error
+                title: '',
+                message: '',
+                onConfirm: null,
+                onCancel: null
+            },
+            // Product để xóa (dùng cho confirm modal)
+            productToDelete: null
         };
         this._isMounted = false; // Flag để track component mount status
     }
@@ -163,7 +175,7 @@ class ProductManage extends Component {
             if (!this._isMounted) return;
             
             if (response && response.errCode === 0) {
-                await addInforProductToMGDB()
+                // API create-product đã tạo sản phẩm thành công, không cần gọi add-new-product nữa
                 
                 if (!this._isMounted) return;
                 
@@ -172,7 +184,12 @@ class ProductManage extends Component {
                 emitter.emit('EVENT_CLEAR_MODAL_DATA')
                 
                 if (this._isMounted) {
-                    toast.success('Product created successfully');
+                    this.showNotificationModal({
+                        type: 'success',
+                        title: 'Thành công',
+                        message: 'Sản phẩm đã được tạo thành công!',
+                        onConfirm: () => this.closeNotificationModal()
+                    });
                 }
             } else {
                 if (this._isMounted) {
@@ -201,7 +218,12 @@ class ProductManage extends Component {
                 emitter.emit('EVENT_CLEAR_MODAL_DATA')
                 
                 if (this._isMounted) {
-                    toast.success('Product updated successfully');
+                    this.showNotificationModal({
+                        type: 'success',
+                        title: 'Thành công',
+                        message: 'Sản phẩm đã được cập nhật thành công!',
+                        onConfirm: () => this.closeNotificationModal()
+                    });
                 }
             } else {
                 if (this._isMounted) {
@@ -220,36 +242,92 @@ class ProductManage extends Component {
         this.handleOpenModalProduct(product);
     }
 
-    handleDeleteProduct = async (product) => {
-        const productName = product.productName || product.name || 'this product';
-        if (!window.confirm(`Are you sure you want to delete "${productName}"?`)) {
-            return;
-        }
+    handleDeleteProduct = (product) => {
+        const productName = product.productName || product.name || 'sản phẩm này';
+        this.setState({ productToDelete: product });
+        this.showNotificationModal({
+            type: 'confirm',
+            title: 'Xác nhận xóa',
+            message: `Bạn có chắc chắn muốn xóa sản phẩm "${productName}"? Hành động này không thể hoàn tác.`,
+            onConfirm: () => this.confirmDeleteProduct(),
+            onCancel: () => this.closeNotificationModal()
+        });
+    }
 
-        const productId = product.id || product.productID;
-        console.log('check productID: ', productId)
+    confirmDeleteProduct = async () => {
+        const { productToDelete } = this.state;
+        if (!productToDelete) return;
+
+        const productId = productToDelete.id || productToDelete.productID;
+        const productName = productToDelete.productName || productToDelete.name || 'sản phẩm';
+        
+        this.closeNotificationModal();
+        
         try {
-            let response = await deleteProduct(productId)
+            let response = await deleteProduct(productId);
             
             // Kiểm tra component còn mounted không
             if (!this._isMounted) return;
             
             if (response && response.errCode === 0) {
+                await this.getAllProductsFromReact();
                 if (this._isMounted) {
-                    toast.success('Product deleted successfully');
+                    this.showNotificationModal({
+                        type: 'success',
+                        title: 'Thành công',
+                        message: `Sản phẩm "${productName}" đã được xóa thành công!`,
+                        onConfirm: () => this.closeNotificationModal()
+                    });
                 }
-                await this.getAllProductsFromReact()
             } else {
                 if (this._isMounted) {
-                    toast.error(response.errMessage || 'Failed to delete product');
+                    this.showNotificationModal({
+                        type: 'error',
+                        title: 'Lỗi',
+                        message: response.errMessage || 'Không thể xóa sản phẩm',
+                        onConfirm: () => this.closeNotificationModal()
+                    });
                 }
             }
         } catch (e) {
-            console.log('error: ', e)
+            console.log('error: ', e);
             if (this._isMounted) {
-                toast.error(e.response?.data?.errMessage || 'Failed to delete product');
+                this.showNotificationModal({
+                    type: 'error',
+                    title: 'Lỗi',
+                    message: e.response?.data?.errMessage || 'Không thể xóa sản phẩm',
+                    onConfirm: () => this.closeNotificationModal()
+                });
             }
+        } finally {
+            this.setState({ productToDelete: null });
         }
+    }
+
+    showNotificationModal = (config) => {
+        this.setState({
+            notificationModal: {
+                isOpen: true,
+                type: config.type || 'success',
+                title: config.title || '',
+                message: config.message || '',
+                onConfirm: config.onConfirm || null,
+                onCancel: config.onCancel || null
+            }
+        });
+    }
+
+    closeNotificationModal = () => {
+        this.setState({
+            notificationModal: {
+                isOpen: false,
+                type: 'success',
+                title: '',
+                message: '',
+                onConfirm: null,
+                onCancel: null
+            }
+        });
     }
 
     formatPrice = (price) => {
@@ -268,7 +346,7 @@ class ProductManage extends Component {
     }
 
     render() {
-        let { listProducts, isOpenModal, currentProduct } = this.state
+        let { listProducts, isOpenModal, currentProduct, notificationModal } = this.state
         return (
             <>
                 <ModalProduct 
@@ -277,6 +355,16 @@ class ProductManage extends Component {
                     isOpenModal={isOpenModal} 
                     toglleFromParent={this.toglleProductModal}
                     productData={currentProduct}
+                />
+
+                <NotificationModal
+                    isOpen={notificationModal.isOpen}
+                    type={notificationModal.type}
+                    title={notificationModal.title}
+                    message={notificationModal.message}
+                    onConfirm={notificationModal.onConfirm}
+                    onCancel={notificationModal.onCancel}
+                    toggle={this.closeNotificationModal}
                 />
 
                 <div className="product-container">

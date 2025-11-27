@@ -71,14 +71,19 @@ class ProductDetail extends Component {
     }
 
     async componentDidUpdate(prevProps) {
-        // Reload khi productId thay đổi
-        const currentProductId = this.props.match?.params?.id || new URLSearchParams(this.props.location?.search).get('id');
-        const prevProductId = prevProps.match?.params?.id || new URLSearchParams(prevProps.location?.search).get('id');
+        // Reload khi productId thay đổi (hỗ trợ cả slug và ID)
+        const currentSlugOrId = this.props.match?.params?.id || this.props.match?.params?.slug || new URLSearchParams(this.props.location?.search).get('id');
+        const prevSlugOrId = prevProps.match?.params?.id || prevProps.match?.params?.slug || new URLSearchParams(prevProps.location?.search).get('id');
         
-        if (currentProductId !== prevProductId) {
+        // Kiểm tra cả pathname để đảm bảo detect route change
+        const currentPath = this.props.location?.pathname;
+        const prevPath = prevProps.location?.pathname;
+        
+        if (currentSlugOrId !== prevSlugOrId || currentPath !== prevPath) {
             this.setState({
                 selectedImageIndex: 0,
-                quantity: 1
+                quantity: 1,
+                isLoading: true
             });
             await this.fetchProductDetail();
         }

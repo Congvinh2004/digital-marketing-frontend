@@ -8,7 +8,7 @@ const createNewProductsFromService = (data) => {
     console.log('check data from service: ', data)
     // Backend chỉ nhận JSON, không nhận FormData
     // Image đã được convert thành base64 string trong ModalProduct
-    return axios.post('/api/add-product', data)
+    return axios.post('/api/create-product', data)
 }
 
 const updateProduct = (productId, data) => {

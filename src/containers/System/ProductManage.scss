@@ -267,11 +267,14 @@
     .modal-header {
         background-color: #04AA6D;
         color: white;
+        display: flex;
+        justify-content: space-between;
 
         .close {
             color: white;
             opacity: 0.8;
-
+            background-color: transparent;
+            cursor: pointer;
             &:hover {
                 opacity: 1;
             }

@@ -6,7 +6,8 @@ import { withRouter } from 'react-router-dom';
 import './Checkout.scss'
 import Header from '../../components/Product/Header';
 import PayPalQRCode from '../../components/Payment/PayPalQRCode';
-import { getCart, getCartTotal } from '../../services/cartService';
+import { getCart, getCartTotal, clearCart } from '../../services/cartService';
+import NotificationModal from '../../components/Common/NotificationModal';
 import { 
     createOrder, 
     updateOrderPayment,
@@ -51,7 +52,15 @@ class Checkout extends Component {
             paypalApprovalUrl: null,
             paypalQRCode: null,
             paypalOrderCreated: false,
-            paymentPollingInterval: null
+            paymentPollingInterval: null,
+            // Notification modal state
+            notificationModal: {
+                isOpen: false,
+                type: 'success',
+                title: '',
+                message: '',
+                onConfirm: null
+            }
         }
     }
 
@@ -586,6 +595,30 @@ class Checkout extends Component {
         }
     }
 
+    showSuccessNotification = (onConfirm) => {
+        this.setState({
+            notificationModal: {
+                isOpen: true,
+                type: 'success',
+                title: 'Đặt hàng thành công!',
+                message: 'Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn đã được xác nhận và sẽ được giao trong thời gian sớm nhất.',
+                onConfirm: onConfirm || (() => this.closeNotificationModal())
+            }
+        });
+    }
+
+    closeNotificationModal = () => {
+        this.setState({
+            notificationModal: {
+                isOpen: false,
+                type: 'success',
+                title: '',
+                message: '',
+                onConfirm: null
+            }
+        });
+    }
+
     handlePlaceOrder = async () => {
         // Kiểm tra đăng nhập lại trước khi đặt hàng
         const userInfo = this.props.userInfo || this.getUserInfoFromLocalStorage();
@@ -689,20 +722,21 @@ class Checkout extends Component {
             const response = await createOrder(orderData);
             
             if (response && response.data) {
-                toast.success('Đơn hàng đã được tạo thành công!');
-                
-                // Xóa giỏ hàng
-                sessionStorage.removeItem('shopping_cart');
+                // Xóa giỏ hàng (sử dụng clearCart để xóa đúng user-specific cart)
+                clearCart();
                 window.dispatchEvent(new Event('cartUpdated'));
 
                 // Dispatch event để refresh sản phẩm (backend đã tự động cập nhật quantity và sold_quantity)
                 window.dispatchEvent(new Event('productsUpdated'));
 
-                setTimeout(() => {
+                // Hiển thị modal thông báo thành công
+                this.showSuccessNotification(() => {
+                    this.closeNotificationModal();
+                    // Redirect về trang chủ sau khi đóng modal
                     if (this.props.history) {
                         this.props.history.push('/home');
                     }
-                }, 2000);
+                });
             }
         } catch (error) {
             console.error('Error creating order:', error);
@@ -713,9 +747,17 @@ class Checkout extends Component {
     }
 
     render() {
-        let { isLoginVisible, isCouponVisible } = this.state
+        let { isLoginVisible, isCouponVisible, notificationModal } = this.state
         return (
             <>
+                <NotificationModal
+                    isOpen={notificationModal.isOpen}
+                    type={notificationModal.type}
+                    title={notificationModal.title}
+                    message={notificationModal.message}
+                    onConfirm={notificationModal.onConfirm}
+                    toggle={this.closeNotificationModal}
+                />
                 <Header />
 
                 <div className='home-checkout-container'>

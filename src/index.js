@@ -38,18 +38,26 @@ const cleanupAfterHotReload = () => {
     document.documentElement.style.paddingRight = '';
 };
 
+const rootElement = document.getElementById('root');
+
 const renderApp = () => {
     // Cleanup trước khi render
     cleanupAfterHotReload();
     
-    ReactDOM.render(
+    const app = (
         <Provider store={reduxStore}>
             <IntlProviderWrapper>
                 <App persistor={persistor} />
             </IntlProviderWrapper>
-        </Provider>,
-        document.getElementById('root')
+        </Provider>
     );
+    
+    // Sử dụng hydrate nếu HTML đã được pre-render (react-snap)
+    if (rootElement.hasChildNodes()) {
+        ReactDOM.hydrate(app, rootElement);
+    } else {
+        ReactDOM.render(app, rootElement);
+    }
 };
 
 renderApp();

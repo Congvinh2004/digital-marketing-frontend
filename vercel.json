@@ -1,0 +1,20 @@
+{
+  "headers": [
+    {
+      "source": "/san-pham/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "index, follow"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/san-pham/:id",
+      "destination": "/san-pham/:id"
+    }
+  ]
+}
+
