@@ -21,9 +21,11 @@ class PaymentCancel extends Component {
             console.log('Payment cancelled with token:', token);
         }
 
-        // Xóa pending order ID khỏi localStorage nếu có
-        const pendingOrderId = localStorage.getItem('pendingPayPalOrderId');
+        // Xóa pending order ID khỏi cả sessionStorage và localStorage nếu có
+        const pendingOrderId = sessionStorage.getItem('pendingPayPalOrderId') 
+            || localStorage.getItem('pendingPayPalOrderId');
         if (pendingOrderId) {
+            sessionStorage.removeItem('pendingPayPalOrderId');
             localStorage.removeItem('pendingPayPalOrderId');
         }
 

@@ -84,29 +84,10 @@
                             display    : flex;
                             align-items: center;
                             margin     : 20px 0;
+                            width      : 100%;
 
-                            .input-email {
-                                margin-bottom: 0;
-                                outline      : none;
-                                border       : 1px solid #ddd;
-                            }
-
-                            .icon-send {
-
-                                width             : 45px;
-                                height            : 45px;
-                                // border         : 1px solid red;
-                                display           : flex;
-                                align-content     : center;
-                                justify-content   : center;
-                                background-color  : #80b500;
-
-                                .fa-paper-plane {
-                                    margin   : 13px 0px;
-                                    font-size: 20px;
-                                    height   : 21px;
-                                }
-                            }
+                            // SubscribeForm component sẽ tự style
+                            // Giữ lại style cũ cho backward compatibility nếu cần
                         }
 
                         .payment-title {

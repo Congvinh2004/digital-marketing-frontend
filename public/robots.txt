@@ -1,0 +1,24 @@
+# robots.txt for F5 Store
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Disallow admin and system pages
+Disallow: /system/
+Disallow: /login
+Disallow: /register
+Disallow: /verify-otp
+Disallow: /forgot-password
+Disallow: /checkout
+Disallow: /cart
+Disallow: /profile
+
+# Allow product pages
+Allow: /product
+Allow: /product-detail/
+Allow: /san-pham/
+
+# Sitemap location
+Sitemap: https://digital-marketing-frontend.vercel.app/sitemap.xml
+

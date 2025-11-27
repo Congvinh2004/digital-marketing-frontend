@@ -365,7 +365,10 @@ class Checkout extends Component {
                     isLoading: false
                 });
                 
-                // Lưu order ID vào localStorage để dùng khi redirect về
+                // Lưu order ID vào cả localStorage và sessionStorage để dùng khi redirect về
+                // sessionStorage: Giữ khi tab còn mở (ít bị mất hơn)
+                // localStorage: Giữ khi đóng trình duyệt (backup)
+                sessionStorage.setItem('pendingPayPalOrderId', systemOrderId);
                 localStorage.setItem('pendingPayPalOrderId', systemOrderId);
                 
                 toast.success('Đã tạo đơn hàng PayPal. Vui lòng quét QR code hoặc click để thanh toán.');
@@ -438,7 +441,9 @@ class Checkout extends Component {
     // Kiểm tra payment status sau khi tab PayPal đóng
     checkPaymentStatusAfterRedirect = async () => {
         try {
-            const orderId = localStorage.getItem('pendingPayPalOrderId');
+            // Lấy order ID từ sessionStorage (ưu tiên) hoặc localStorage (fallback)
+            const orderId = sessionStorage.getItem('pendingPayPalOrderId') 
+                || localStorage.getItem('pendingPayPalOrderId');
             if (!orderId) {
                 return;
             }
@@ -454,7 +459,8 @@ class Checkout extends Component {
                 sessionStorage.removeItem('shopping_cart');
                 window.dispatchEvent(new Event('cartUpdated'));
                 
-                // Xóa pending order ID
+                // Xóa pending order ID khỏi cả sessionStorage và localStorage
+                sessionStorage.removeItem('pendingPayPalOrderId');
                 localStorage.removeItem('pendingPayPalOrderId');
                 
                 toast.success('Thanh toán PayPal thành công!');
