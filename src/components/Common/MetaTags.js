@@ -17,7 +17,9 @@ class MetaTags extends Component {
         } = this.props;
 
         // Tạo absolute URL cho image và url (hỗ trợ ngrok)
-        const fullImageUrl = createAbsoluteImageUrl(image);
+        // Sử dụng hình mặc định nếu không có hình
+        const defaultImage = `${window.location.origin}/logo_F5.png`;
+        const fullImageUrl = image ? createAbsoluteImageUrl(image) : defaultImage;
         const fullUrl = url ? createAbsoluteUrl(url) : window.location.href;
 
         return (
@@ -32,9 +34,10 @@ class MetaTags extends Component {
                 <meta property="og:title" content={title} />
                 <meta property="og:description" content={description} />
                 <meta property="og:url" content={fullUrl} />
-                {fullImageUrl && <meta property="og:image" content={fullImageUrl} />}
+                <meta property="og:image" content={fullImageUrl} />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
+                <meta property="og:image:type" content="image/png" />
                 <meta property="og:site_name" content={siteName} />
                 <meta property="og:locale" content="vi_VN" />
 
@@ -42,7 +45,7 @@ class MetaTags extends Component {
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={title} />
                 <meta name="twitter:description" content={description} />
-                {fullImageUrl && <meta name="twitter:image" content={fullImageUrl} />}
+                <meta name="twitter:image" content={fullImageUrl} />
 
                 {/* Canonical URL */}
                 <link rel="canonical" href={fullUrl} />
