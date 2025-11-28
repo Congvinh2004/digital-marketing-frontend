@@ -120,3 +120,4 @@ Component sẽ tự động:
    - Console tab → Tìm logs bắt đầu bằng "Daily Revenue Response:" và "Monthly Revenue Response:"
 
 
+
