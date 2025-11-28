@@ -10,7 +10,6 @@ import { getCart, getCartTotal, clearCart } from '../../services/cartService';
 import NotificationModal from '../../components/Common/NotificationModal';
 import { 
     createOrder, 
-    updateOrderPayment,
     createPayPalOrder,
     capturePayPalOrder,
     getOrderDetail
@@ -18,7 +17,6 @@ import {
 import { createShippingAddress } from '../../services/addressService';
 import { formatDualCurrency, vndToUsd } from '../../utils/currencyHelper';
 import Cash from '../../imgs/icons/cash.png'
-import ApplePay from '../../imgs/icons/applepay.png'
 import payPal from '../../imgs/icons/payment-3.png'
 import Footer from '../../components/Product/Footer';
 
@@ -29,7 +27,7 @@ class Checkout extends Component {
         this.state = {
             isLoginVisible: false,
             isCouponVisible: false,
-            selectedPaymentMethod: 'cash', // 'cash', 'applepay', 'paypal'
+            selectedPaymentMethod: 'COD', // 'COD', 'vnpay', 'paypal'
             cartItems: [],
             cartTotal: 0,
             shipping: 0, // Đã bỏ phí ship
@@ -196,6 +194,12 @@ class Checkout extends Component {
     }
 
     handlePaymentMethodChange = (method) => {
+        // Nếu chọn VNPay, hiển thị thông báo chức năng chưa hoàn thiện
+        if (method === 'vnpay') {
+            toast.info('Chức năng thanh toán VNPay chưa hoàn thiện. Vui lòng chọn phương thức thanh toán khác.');
+            return;
+        }
+        
         // Chỉ thay đổi payment method, không tự động tạo order
         this.setState({ 
             selectedPaymentMethod: method,
@@ -302,6 +306,7 @@ class Checkout extends Component {
                     // Không gửi price vì backend tự tính
                 })),
                 shipping_address_id: shippingAddressId,
+                payment_method: 'paypal', // Gửi payment method cho backend
                 // Gửi total_amount_usd (USD) - backend sẽ dùng để tạo PayPal order
                 total_amount_usd: parseFloat(totalUSD.toFixed(2)),
                 currency: 'USD'
@@ -337,7 +342,11 @@ class Checkout extends Component {
 
             // Bước 3: Tạo PayPal order và lấy approval URL + QR code
             // Backend sẽ tự động dùng total_amount_usd đã lưu trong order để tạo PayPal order
-            const paypalResponse = await createPayPalOrder(systemOrderId);
+            // Gửi returnUrl và cancelUrl động từ frontend để tránh hardcode localhost
+            const paypalResponse = await createPayPalOrder(systemOrderId, {
+                returnUrl: `${window.location.origin}/payment/success`,
+                cancelUrl: `${window.location.origin}/payment/cancel`
+            });
             
             // Kiểm tra lỗi từ PayPal API
             if (paypalResponse && paypalResponse.errCode !== 0) {
@@ -492,7 +501,7 @@ class Checkout extends Component {
                 // Nếu không, cần lưu vào state khi tạo order
 
                 // Capture payment
-                const captureResponse = await capturePayPalOrder(token, this.state.paypalOrderId);
+                const captureResponse = await capturePayPalOrder(token, this.state.paypalOrderId, 'paypal');
                 
                 if (captureResponse && captureResponse.data) {
                     toast.success('Thanh toán PayPal thành công!');
@@ -671,6 +680,12 @@ class Checkout extends Component {
             return;
         }
 
+        // Nếu chọn VNPay, hiển thị thông báo
+        if (selectedPaymentMethod === 'vnpay') {
+            toast.info('Chức năng thanh toán VNPay chưa hoàn thiện. Vui lòng chọn phương thức thanh toán khác.');
+            return;
+        }
+
         // Nếu chọn PayPal, khởi tạo PayPal payment
         if (selectedPaymentMethod === 'paypal') {
             // Nếu chưa tạo PayPal order, tạo mới
@@ -683,7 +698,7 @@ class Checkout extends Component {
             return;
         }
 
-        // Xử lý thanh toán COD hoặc ApplePay
+        // Xử lý thanh toán COD
         try {
             this.setState({ isLoading: true });
 
@@ -721,7 +736,8 @@ class Checkout extends Component {
                     quantity: item.quantity
                     // Không gửi price vì backend tự tính
                 })),
-                shipping_address_id: shippingAddressId
+                shipping_address_id: shippingAddressId,
+                payment_method: 'COD' // Gửi payment method cho backend
                 // Chỉ gửi items và shipping_address_id theo đúng format backend yêu cầu
             };
 
@@ -960,16 +976,16 @@ class Checkout extends Component {
                                 <div className="payment-method-title-body">
                                     <div className="payment-method">
                                         <div 
-                                            className={`payment-method-item cash ${this.state.selectedPaymentMethod === 'cash' ? 'active' : ''}`}
-                                            onClick={() => this.handlePaymentMethodChange('cash')}
+                                            className={`payment-method-item cash ${this.state.selectedPaymentMethod === 'COD' ? 'active' : ''}`}
+                                            onClick={() => this.handlePaymentMethodChange('COD')}
                                             style={{ cursor: 'pointer' }}
                                         >
                                             <div className='selection-type-payment'>
                                                 <div className='check-box'>
-                                                    {this.state.selectedPaymentMethod === 'cash' && <div className='check-box-child'></div>}
+                                                    {this.state.selectedPaymentMethod === 'COD' && <div className='check-box-child'></div>}
                                                 </div>
                                                 <span className='payment-method-type'>
-                                                    Cash on delivery
+                                                    COD (Cash on delivery)
                                                 </span>
                                             </div>
                                             <img className='payment-method-img' src={Cash} alt="#" />
@@ -977,22 +993,36 @@ class Checkout extends Component {
                                     </div>
                                     <div className="payment-method">
                                         <div 
-                                            className={`payment-method-item apple-pay ${this.state.selectedPaymentMethod === 'applepay' ? 'active' : ''}`}
-                                            onClick={() => this.handlePaymentMethodChange('applepay')}
+                                            className={`payment-method-item vnpay ${this.state.selectedPaymentMethod === 'vnpay' ? 'active' : ''}`}
+                                            onClick={() => this.handlePaymentMethodChange('vnpay')}
                                             style={{ cursor: 'pointer' }}
                                         >
                                             <div className='selection-type-payment'>
                                                 <div className='check-box'>
-                                                    {this.state.selectedPaymentMethod === 'applepay' && <div className='check-box-child'></div>}
+                                                    {this.state.selectedPaymentMethod === 'vnpay' && <div className='check-box-child'></div>}
                                                 </div>
                                                 <span className='payment-method-type'>
-                                                    ApplePay
+                                                    VNPay
                                                 </span>
                                             </div>
-                                            <img className='payment-method-img' src={ApplePay} alt="#" />
+                                            <div className='payment-method-img' style={{ 
+                                                width: '60px', 
+                                                height: '40px', 
+                                                display: 'flex', 
+                                                alignItems: 'center', 
+                                                justifyContent: 'center',
+                                                backgroundColor: '#fff',
+                                                border: '1px solid #ddd',
+                                                borderRadius: '4px',
+                                                fontSize: '12px',
+                                                fontWeight: 'bold',
+                                                color: '#005baa'
+                                            }}>
+                                                VNPay
+                                            </div>
                                         </div>
                                         <div className="payment-method-detail">
-                                            <p>Apple Pay is the modern way to pay.</p>
+                                            <p>Thanh toán qua cổng VNPay (Chức năng đang phát triển)</p>
                                         </div>
                                     </div>
                                     <div className="payment-method">

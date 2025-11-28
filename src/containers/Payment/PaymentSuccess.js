@@ -73,19 +73,20 @@ class PaymentSuccess extends Component {
                 || localStorage.getItem('pendingPayPalOrderId');
 
             // Fallback: Nếu không tìm thấy trong storage, thử tìm order dựa trên PayPal Order ID
-            // Backend có thể tự tìm order dựa trên PayPal Order ID
+            // Điều này xảy ra khi user thanh toán trên domain khác (Vercel) nhưng redirect về localhost
+            // hoặc khi localStorage/sessionStorage bị clear
             if (!systemOrderId) {
-                console.warn('No system orderId found in localStorage, attempting to capture with PayPal Order ID only');
+                console.warn('No system orderId found in storage. PayPal Order ID:', paypalOrderId);
+                console.warn('This might happen if user was redirected from different domain.');
+                console.warn('Attempting to capture payment with PayPal Order ID only...');
                 
-                // Thử capture payment với orderId = null, để backend tự tìm order
-                // Hoặc có thể thử với orderId = 0 để backend biết cần tìm order
+                // Thử capture payment với orderId = null, để backend tự tìm order dựa trên PayPal Order ID
                 try {
-                    // Thử capture với orderId = null (nếu backend hỗ trợ)
-                    // Nếu không, sẽ throw error và xử lý ở catch block
-                    const captureResponse = await capturePayPalOrder(paypalOrderId, null);
+                    const captureResponse = await capturePayPalOrder(paypalOrderId, null, 'paypal');
                     
                     if (captureResponse && captureResponse.errCode === 0) {
                         // Thành công, backend đã tự tìm được order
+                        console.log('Successfully captured payment using PayPal Order ID only');
                         this.onPaymentSuccess(captureResponse);
                         return;
                     } else {
@@ -93,15 +94,21 @@ class PaymentSuccess extends Component {
                     }
                 } catch (fallbackError) {
                     console.error('Fallback capture failed:', fallbackError);
-                    // Nếu fallback thất bại, báo lỗi
+                    const errorMsg = fallbackError.response?.data?.errMessage || 
+                                   fallbackError.message || 
+                                   'Không tìm thấy thông tin đơn hàng';
+                    
+                    // Nếu fallback thất bại, báo lỗi chi tiết hơn
                     this.setState({
                         isLoading: false,
                         paymentStatus: 'error'
                     });
-                    toast.error('Không tìm thấy thông tin đơn hàng. Vui lòng kiểm tra lại hoặc liên hệ hỗ trợ.');
+                    
+                    toast.error(`${errorMsg}. Vui lòng kiểm tra lại hoặc liên hệ hỗ trợ với PayPal Order ID: ${paypalOrderId}`);
+                    
                     setTimeout(() => {
                         this.props.history.push('/checkout');
-                    }, 3000);
+                    }, 5000); // Tăng thời gian để user đọc thông báo
                     return;
                 }
             }
@@ -111,7 +118,7 @@ class PaymentSuccess extends Component {
             // Capture payment
             // paypalOrderId: PayPal Order ID từ URL (token)
             // systemOrderId: System order ID từ localStorage
-            const captureResponse = await capturePayPalOrder(paypalOrderId, parseInt(systemOrderId));
+            const captureResponse = await capturePayPalOrder(paypalOrderId, parseInt(systemOrderId), 'paypal');
 
             if (captureResponse && captureResponse.errCode === 0) {
                 this.onPaymentSuccess(captureResponse);

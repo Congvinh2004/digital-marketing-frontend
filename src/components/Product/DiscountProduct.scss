@@ -2,10 +2,30 @@
     margin-top: 50px;
 
     .product-tab-content-inner {
-        display    : flex;
-        align-items: center;
-        flex-wrap  : wrap;
-
-
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(242px, 1fr));
+        gap: 20px;
+        justify-items: center;
+        align-items: start;
+        
+        // Responsive cho màn hình nhỏ
+        @media (max-width: 768px) {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        @media (max-width: 480px) {
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 10px;
+        }
+        
+        // Fallback cho trình duyệt không hỗ trợ grid
+        @supports not (display: grid) {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: stretch;
+            gap: 20px;
+        }
     }
 }

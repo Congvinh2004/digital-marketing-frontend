@@ -1,4 +1,4 @@
-# robots.txt for F5 Store
+# robots.txt for F5 Mart
 # Allow all search engines to crawl the site
 
 User-agent: *

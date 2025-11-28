@@ -9,6 +9,7 @@ export const path = {
     SYSTEM: '/system',
     ADMIN_PRODUCT_MANAGE: '/system/product-manage',
     ADMIN_USER_MANAGE: '/system/user-manage',
+    ADMIN_ORDER_MANAGE: '/system/order-manage',
     ABOUT: '/about',
     HOMEPRODUCT: '/product',
     PRODUCT_DETAIL: '/product-detail',

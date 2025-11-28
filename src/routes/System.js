@@ -15,6 +15,7 @@ class System extends Component {
                         <AdminProtectedRoute path="/system/user-manage" exact component={ManagePage} />
                         <AdminProtectedRoute path="/system/product-manage" exact component={ManagePage} />
                         <AdminProtectedRoute path="/system/category-manage" exact component={ManagePage} />
+                        <AdminProtectedRoute path="/system/order-manage" exact component={ManagePage} />
                         <AdminProtectedRoute path="/system/register-package-group-or-account" component={RegisterPackageGroupOrAcc} />
                         <Route path="/system" exact component={() => { return (<Redirect to={systemMenuPath || '/system/product-manage'} />) }} />
                         <Route component={() => { return (<Redirect to={systemMenuPath || '/system/product-manage'} />) }} />

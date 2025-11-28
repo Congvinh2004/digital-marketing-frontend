@@ -4,7 +4,7 @@
     height: 100vh; // Đảm bảo có chiều cao cố định
     background-color: #f5f5f5;
     position: relative;
-    overflow: hidden; // Ngăn scroll ở container cha
+    overflow: hidden; // Ngăn scroll ở container cha, scroll ở manage-content
 }
 
 .manage-sidebar {
@@ -30,6 +30,126 @@
             font-size: 20px;
             font-weight: 600;
             color: white;
+        }
+    }
+
+    .sidebar-profile {
+        position: relative;
+        padding: 15px 20px;
+        background-color: #1a252f;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+        .profile-button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 8px;
+            border-radius: 6px;
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+            .profile-avatar {
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                flex-shrink: 0;
+
+                i {
+                    font-size: 24px;
+                    color: white;
+                }
+            }
+
+            .profile-info {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                min-width: 0; // Để text có thể truncate
+
+                .profile-name {
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: white;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .profile-role {
+                    font-size: 12px;
+                    color: rgba(255, 255, 255, 0.7);
+                }
+            }
+
+            .profile-arrow {
+                flex-shrink: 0;
+                color: rgba(255, 255, 255, 0.7);
+                transition: transform 0.3s;
+
+                i {
+                    font-size: 12px;
+                }
+            }
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #34495e;
+            border-radius: 6px;
+            margin-top: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            z-index: 1001;
+            animation: slideDown 0.2s ease-out;
+
+            .dropdown-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 20px;
+                cursor: pointer;
+                transition: all 0.3s;
+                color: white;
+                font-size: 14px;
+
+                i {
+                    font-size: 16px;
+                    width: 20px;
+                    text-align: center;
+                }
+
+                &:hover {
+                    background-color: rgba(255, 255, 255, 0.1);
+                }
+
+                &:active {
+                    background-color: rgba(255, 255, 255, 0.2);
+                }
+            }
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
 
@@ -77,11 +197,12 @@
 .manage-content {
     flex: 1;
     margin-left: 250px;
-    overflow-y: auto;
+    overflow-y: auto !important; // Đảm bảo scroll hoạt động
     overflow-x: hidden;
     padding: 0;
     background-color: #f5f5f5;
     height: 100vh; // Đảm bảo có chiều cao cố định để scroll hoạt động
+    position: relative; // Đảm bảo positioning đúng
 
     // Override padding của ProductManage, UserManage và CategoryManage
     .product-container,
@@ -93,6 +214,25 @@
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         min-height: calc(100vh - 40px); // Đảm bảo container có chiều cao tối thiểu
+    }
+
+    // OrderManage wrapper - đây là nơi scroll xảy ra
+    .order-manage-wrapper {
+        width: 100%;
+        height: 100vh; // Chiếm toàn bộ chiều cao viewport
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: relative;
+        
+        .order-manage-container {
+            margin: 0;
+            padding: 20px;
+            // Đảm bảo container có thể mở rộng và scroll được
+            height: auto;
+            min-height: 100%; // Ít nhất bằng chiều cao wrapper
+            display: block;
+            position: relative;
+        }
     }
 }
 

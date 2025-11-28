@@ -24,6 +24,10 @@ export const createOrder = (orderData) => {
  * Cập nhật trạng thái đơn hàng sau khi thanh toán PayPal thành công
  * @param {String} orderId - ID đơn hàng
  * @param {Object} paymentData - Thông tin thanh toán từ PayPal
+ *   - paypal_order_id: String - PayPal order ID
+ *   - paypal_transaction_id: String - PayPal transaction ID
+ *   - payment_status: String - Trạng thái thanh toán (e.g., "paid")
+ *   - payment_method: String - Hình thức thanh toán (e.g., "paypal")
  * @returns {Promise}
  */
 export const updateOrderPayment = (orderId, paymentData) => {
@@ -52,10 +56,20 @@ export const getOrderDetail = (orderId) => {
  * Tạo PayPal order và lấy approval URL + QR code
  * Backend sẽ tự động dùng total_amount_usd đã lưu trong order
  * @param {Number} orderId - ID đơn hàng trong hệ thống
+ * @param {Object} options - Optional: returnUrl, cancelUrl
  * @returns {Promise}
  */
-export const createPayPalOrder = (orderId) => {
-    return axios.post('/api/paypal/create-order', { orderId });
+export const createPayPalOrder = (orderId, options = {}) => {
+    // Tự động tạo returnUrl và cancelUrl từ window.location.origin
+    const baseUrl = window.location.origin;
+    const returnUrl = options.returnUrl || `${baseUrl}/payment/success`;
+    const cancelUrl = options.cancelUrl || `${baseUrl}/payment/cancel`;
+    
+    return axios.post('/api/paypal/create-order', { 
+        orderId,
+        returnUrl,
+        cancelUrl
+    });
 };
 
 /**
@@ -81,12 +95,14 @@ export const getQRCode = (approvalUrl, orderId = null) => {
  * Capture payment sau khi user approve
  * @param {String} paypalOrderId - PayPal order ID
  * @param {Number} orderId - ID đơn hàng trong hệ thống
+ * @param {String} paymentMethod - Hình thức thanh toán ('paypal', 'COD', 'vnpay', etc.)
  * @returns {Promise}
  */
-export const capturePayPalOrder = (paypalOrderId, orderId) => {
+export const capturePayPalOrder = (paypalOrderId, orderId, paymentMethod = 'paypal') => {
     return axios.post('/api/paypal/capture-order', { 
         paypal_order_id: paypalOrderId,
-        orderId 
+        orderId,
+        payment_method: paymentMethod
     });
 };
 

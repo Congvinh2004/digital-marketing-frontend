@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './Footer.scss';
 import logo from '../../imgs/logo_F5.png';
 import payment from '../../imgs/icons/payment-4.png';
-import SubscribeForm from '../Common/SubscribeForm';
+import Newsletter from '../Common/Newsletter';
 
 /**
  * Footer Component
@@ -114,7 +114,7 @@ class Footer extends Component {
                                                     <br /> receive updates via email.
                                                 </p>
                                                 <div className="footer-newsletter">
-                                                    <SubscribeForm variant="inline" />
+                                                    <Newsletter variant="inline" />
                                                 </div>
                                                 <h5 className='payment-title'>We Accept</h5>
                                                 <img src={payment} alt="Payment Image" />

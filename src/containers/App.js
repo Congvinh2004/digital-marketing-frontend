@@ -23,6 +23,7 @@ import PaymentSuccess from './Payment/PaymentSuccess.js';
 import PaymentCancel from './Payment/PaymentCancel.js';
 import Profile from './Profile/Profile.js';
 import ProtectedRoute from '../components/ProtectedRoute/ProtectedRoute';
+import UserOnlyRoute from '../components/ProtectedRoute/UserOnlyRoute';
 import { setUserInfo, userLogout } from '../store/actions';
 import ZaloChatWidget from '../components/Common/ZaloChatWidget';
 import TalkToWidget from '../components/Common/TalkToWidget';
@@ -146,14 +147,14 @@ class App extends Component {
                                 <Switch>
                                     <Route path={path.HOME} exact component={(Home)} />
                                     {/* URL thân thiện cho sản phẩm: /san-pham/:slug hoặc /product-detail/:id */}
-                                    <Route path="/san-pham/:slug" component={(ProductDetail)} />
-                                    <Route path={`${path.PRODUCT_DETAIL}/:id`} component={(ProductDetail)} />
-                                    <Route path={path.HOMEPRODUCT} component={(HomeProduct)} />
-                                    {/* Protected routes - cần đăng nhập */}
+                                    <UserOnlyRoute path="/san-pham/:slug" component={(ProductDetail)} />
+                                    <UserOnlyRoute path={`${path.PRODUCT_DETAIL}/:id`} component={(ProductDetail)} />
+                                    <UserOnlyRoute path={path.HOMEPRODUCT} component={(HomeProduct)} />
+                                    {/* Protected routes - cần đăng nhập và chỉ dành cho user (không phải admin) */}
                                     <ProtectedRoute path={path.PROFILE} component={Profile} />
                                     <ProtectedRoute path={path.CART} component={Cart} />
                                     <ProtectedRoute path={path.CHECKOUT} component={Checkout} />
-                                    <Route path={path.HOMEPAGE} component={HomePage} />
+                                    <UserOnlyRoute path={path.HOMEPAGE} component={HomePage} />
                                 </Switch>
                             </CustomScrollbars>
                                 </div>

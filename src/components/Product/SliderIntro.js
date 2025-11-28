@@ -63,9 +63,9 @@ class SliderIntro extends Component {
                                         <h5 className="slide-sub-title ltn__secondary-color animated text-uppercase">
                                             Up To 50% Off Today Only!
                                         </h5>
-                                        <h1 className="slide-title  animated" style={{ fontSize: '46px' }}>
+                                        <h2 className="slide-title  animated" style={{ fontSize: '46px' }}>
                                             Tasty &amp; Healthy <br /> Organic Food
-                                        </h1>
+                                        </h2>
                                         <div className="slide-brief animated d-none">
                                             <p>
                                                 Predictive analytics is drastically changing the real estate industry.
@@ -87,9 +87,9 @@ class SliderIntro extends Component {
                                         <h5 className="slide-sub-title ltn__secondary-color animated text-uppercase">
                                             welcome to our shop
                                         </h5>
-                                        <h1 className="slide-title  animated" style={{ fontSize: '46px' }}>
+                                        <h2 className="slide-title  animated" style={{ fontSize: '46px' }}>
                                             Clean Fruits <br /> Quality
-                                        </h1>
+                                        </h2>
                                         <div className="slide-brief animated d-none">
                                             <p>
                                                 Predictive analytics is drastically changing the real

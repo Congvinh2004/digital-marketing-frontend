@@ -1,15 +1,17 @@
 .product-item {
     height: auto;
     min-height: 100%; // Đảm bảo chiều cao tối thiểu bằng container
-    width : 100%;
+    width: 100%;
     max-width: 242px;
+    min-width: 242px; // Đảm bảo chiều rộng tối thiểu
     cursor: pointer;
     border: 1px solid #ddd;
-    margin: 20px;
+    margin: 0; // Bỏ margin vì đã dùng gap trong grid
     display: flex;
     flex-direction: column;
     align-self: stretch; // Đảm bảo card có cùng chiều cao với các card khác trong cùng hàng
     overflow: visible; // Đảm bảo nội dung không bị cắt
+    box-sizing: border-box; // Đảm bảo padding và border tính trong width
 
     .product-img {
         height             : 240px;

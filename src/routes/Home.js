@@ -1,20 +1,19 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { isAdmin } from '../utils/authHelper';
+import { path } from '../utils/constant';
 
 class Home extends Component {
 
     render() {
-        // const { isLoggedIn } = this.props;
-        const isLoggedIn = false;
+        // Kiểm tra nếu user là admin, redirect về trang admin
+        if (isAdmin()) {
+            return <Redirect to={path.ADMIN_PRODUCT_MANAGE} />;
+        }
 
-        let linkToRedirect = isLoggedIn ? '/system/user-manage' : '/home';
-
-        return (
-            <Redirect to={linkToRedirect} />
-
-
-        );
+        // Nếu không phải admin, redirect về trang chủ
+        return <Redirect to={path.HOMEPAGE} />;
     }
 
 }

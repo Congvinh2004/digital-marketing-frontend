@@ -17,6 +17,8 @@ import '../../styles/base.css'
 import SpecialProduct from '../../components/Product/SpecialProduct';
 import DiscountProduct from '../../components/Product/DiscountProduct';
 import Footer from '../../components/Product/Footer';
+import MetaTags from '../../components/Common/MetaTags';
+import { Helmet } from 'react-helmet';
 
 
 import logo from '../../imgs/logo_F5.png'
@@ -89,7 +91,9 @@ class HomePage extends Component {
             topSellingProducts: [], // Danh sách sản phẩm bán chạy nhất
             listCategories: [], // Danh sách categories
             selectedCategory: null, // Category được chọn (null = tất cả)
-            discountProducts: [] // Danh sách sản phẩm đang giảm giá
+            discountProducts: [], // Danh sách sản phẩm đang giảm giá
+            ourProducts: [], // Danh sách sản phẩm cho phần Our Products
+            selectedProductCategory: null // Category được chọn trong phần Our Products
         }
     }
 
@@ -127,6 +131,8 @@ class HomePage extends Component {
         this.fetchTopSellingProducts();
         // Load danh sách sản phẩm đang giảm giá
         this.fetchDiscountProducts();
+        // Load danh sách sản phẩm cho phần Our Products
+        this.fetchOurProducts();
     }
 
     componentDidUpdate(prevProps) {
@@ -284,15 +290,113 @@ class HomePage extends Component {
             isTypeProduct: resultSelect
         })
     }
+
+    fetchOurProducts = async (categoryId = null) => {
+        try {
+            let response;
+            if (categoryId) {
+                response = await getProductByCategoryId(categoryId);
+            } else {
+                response = await getAllProducts();
+            }
+
+            if (response && response.data && Array.isArray(response.data)) {
+                // Lấy tối đa 12 sản phẩm
+                const products = response.data.slice(0, 12);
+                this.setState({ ourProducts: products });
+            } else if (Array.isArray(response)) {
+                const products = response.slice(0, 12);
+                this.setState({ ourProducts: products });
+            } else {
+                const products = response?.data || response || [];
+                if (Array.isArray(products)) {
+                    this.setState({ ourProducts: products.slice(0, 12) });
+                } else {
+                    this.setState({ ourProducts: [] });
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching our products:', error);
+            this.setState({ ourProducts: [] });
+        }
+    }
+
+    handleSelectProductCategory = async (categoryId) => {
+        this.setState({ selectedProductCategory: categoryId });
+        await this.fetchOurProducts(categoryId);
+    }
     render() {
         let { isTypeProduct, listProduct } = this.state
         console.log('check list product: ', listProduct[isTypeProduct])
     let userInfo = this.props.userInfo;
     console.log('check user info: ', userInfo)
         let { listImgBanner, listCategoty } = this.state
+        
+        // SEO Content cho trang chủ
+        const seoTitle = 'F5 Mart - Cửa Hàng Trực Tuyến Uy Tín | Mua Sắm Online Chất Lượng';
+        const seoDescription = 'F5 Mart - Cửa hàng trực tuyến hàng đầu Việt Nam chuyên cung cấp các sản phẩm chất lượng cao với giá cả hợp lý. Mua sắm online tiện lợi, giao hàng nhanh chóng, thanh toán an toàn. Khám phá ngàn sản phẩm đa dạng từ thực phẩm, đồ uống, rau củ quả đến các mặt hàng tiêu dùng thiết yếu.';
+        const seoKeywords = 'F5 Mart, cửa hàng trực tuyến, mua sắm online, thương mại điện tử, sản phẩm chất lượng, giao hàng nhanh, thanh toán an toàn, mua hàng online Việt Nam, shop online uy tín';
+        const seoImage = `${window.location.origin}/logo_F5.png`;
+        const seoUrl = `${window.location.origin}/home`;
+        
         return (
 
             <>
+                {/* Meta Tags for SEO */}
+                <MetaTags
+                    title={seoTitle}
+                    description={seoDescription}
+                    image={seoImage}
+                    url={seoUrl}
+                    type="website"
+                    siteName="F5 Mart"
+                    keywords={seoKeywords}
+                />
+                
+                {/* Schema.org JSON-LD Markup for SEO */}
+                <Helmet>
+                    <script type="application/ld+json">
+                        {JSON.stringify({
+                            "@context": "https://schema.org",
+                            "@type": "Store",
+                            "name": "F5 Mart",
+                            "description": "Cửa hàng trực tuyến hàng đầu Việt Nam chuyên cung cấp các sản phẩm chất lượng cao với giá cả hợp lý",
+                            "url": seoUrl,
+                            "logo": seoImage,
+                            "image": seoImage,
+                            "priceRange": "$$",
+                            "address": {
+                                "@type": "PostalAddress",
+                                "addressCountry": "VN",
+                                "addressLocality": "Việt Nam"
+                            },
+                            "contactPoint": {
+                                "@type": "ContactPoint",
+                                "telephone": "+0123-456-789",
+                                "contactType": "customer service",
+                                "email": "info@webmail.com",
+                                "availableLanguage": ["Vietnamese"]
+                            },
+                            "sameAs": [
+                                "https://www.facebook.com",
+                                "https://www.youtube.com"
+                            ],
+                            "potentialAction": {
+                                "@type": "SearchAction",
+                                "target": {
+                                    "@type": "EntryPoint",
+                                    "urlTemplate": `${seoUrl}/product?search={search_term_string}`
+                                },
+                                "query-input": "required name=search_term_string"
+                            },
+                            "aggregateRating": {
+                                "@type": "AggregateRating",
+                                "ratingValue": "4.8",
+                                "reviewCount": "1250"
+                            }
+                        })}
+                    </script>
+                </Helmet>
 
                 {/* HEADER AREA START (header-3) */}
                 <header className="header-container">
@@ -591,7 +695,7 @@ class HomePage extends Component {
                         <div className="row">
                             <div className="col-lg-12">
                                 <div className="section-title-area ltn__section-title-2--- text-center">
-                                    <h1 className="section-title white-color---">Sản Phẩm Bán Chạy</h1>
+                                    <h2 className="section-title white-color---">Sản Phẩm Bán Chạy</h2>
                                     <p className="white-color---">
                                         Top 8 sản phẩm được yêu thích nhất
                                     </p>
@@ -659,38 +763,80 @@ class HomePage extends Component {
                         <div className="row">
                             <div className="col-lg-12">
                                 <div className="section-title-area ltn__section-title-2--- text-center">
-                                    {/* <h6 class="section-subtitle ltn__secondary-color">// Cars</h6> */}
-                                    <h1 className="section-title">Our Products</h1>
-                                    <p>
-                                        A highly efficient slip-ring scanner for today's diagnostic
-                                        requirements.
+                                    <h2 className="section-title">Sản Phẩm Của Chúng Tôi</h2>
+                                    <p style={{ color: '#666' , paddingTop: '20px'}}>
+                                        Khám phá bộ sưu tập sản phẩm đa dạng và chất lượng cao từ F5 Mart. 
+                                        Từ thực phẩm tươi sống đến các mặt hàng tiêu dùng thiết yếu, 
+                                        chúng tôi mang đến cho bạn những lựa chọn tốt nhất với giá cả hợp lý.
                                     </p>
                                 </div>
 
                                 {/* LIST ACTION  */}
-                                <div className="list-memu">
-
-                                    <div className="list-menu-content">
-                                        <span className={`item-menu ${isTypeProduct === 'foodDrinks' ? 'active' : ''}`} onClick={() => this.handleSelectCategory('foodDrinks')}>
-                                            Food &amp; Drinks
-                                        </span>
-                                        <span className={`item-menu ${isTypeProduct === 'vegetables' ? 'active' : ''}`} onClick={() => this.handleSelectCategory('vegetables')}>
-                                            Vegetables
-                                        </span>
-                                        <span className={`item-menu ${isTypeProduct === 'driedFoods' ? 'active' : ''}`} onClick={() => this.handleSelectCategory('driedFoods')}>
-                                            Dried Foods
-                                        </span>
-                                        <span className={`item-menu ${isTypeProduct === 'breadCake' ? 'active' : ''}`} onClick={() => this.handleSelectCategory('breadCake')}>
-                                            Bread &amp; Cake
-                                        </span>
-                                        <span className={`item-menu ${isTypeProduct === 'fishMeat' ? 'active' : ''}`} onClick={() => this.handleSelectCategory('fishMeat')}>
-                                            Fish &amp; Meat
-                                        </span>
+                                {this.state.listCategories && this.state.listCategories.length > 0 && (
+                                    <div className="list-memu">
+                                        <div className="list-menu-content">
+                                            <span 
+                                                className={`item-menu ${this.state.selectedProductCategory === null ? 'active' : ''}`} 
+                                                onClick={() => this.handleSelectProductCategory(null)}
+                                            >
+                                                Tất Cả
+                                            </span>
+                                            {this.state.listCategories.map((category) => (
+                                                <span 
+                                                    key={category.id || category.categoryId}
+                                                    className={`item-menu ${this.state.selectedProductCategory === (category.id || category.categoryId) ? 'active' : ''}`} 
+                                                    onClick={() => this.handleSelectProductCategory(category.id || category.categoryId)}
+                                                >
+                                                    {category.name || category.categoryName || 'Danh mục'}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </div>
+                                )}
+
+                                {this.state.ourProducts && this.state.ourProducts.length > 0 ? (
+                                    <DiscountProduct listProductByType={this.state.ourProducts} />
+                                ) : (
+                                    <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+                                        <p>Đang tải sản phẩm...</p>
+                                    </div>
+                                )}
+
+                                {/* Nút Xem Thêm */}
+                                <div style={{ 
+                                    textAlign: 'center', 
+                                    marginTop: '50px',
+                                    marginBottom: '20px'
+                                }}>
+                                    <button
+                                        onClick={() => this.props.history.push(path.HOMEPRODUCT)}
+                                        style={{
+                                            padding: '12px 40px',
+                                            fontSize: '16px',
+                                            fontWeight: '600',
+                                            color: '#fff',
+                                            backgroundColor: '#80b500',
+                                            border: 'none',
+                                            borderRadius: '5px',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.3s ease',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '1px'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.target.style.backgroundColor = '#6a9900';
+                                            e.target.style.transform = 'translateY(-2px)';
+                                            e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.backgroundColor = '#80b500';
+                                            e.target.style.transform = 'translateY(0)';
+                                            e.target.style.boxShadow = 'none';
+                                        }}
+                                    >
+                                        Xem Thêm Sản Phẩm
+                                    </button>
                                 </div>
-
-
-                                <DiscountProduct listProductByType={listProduct[isTypeProduct]} />
                             </div>
                         </div>
                     </div>
@@ -725,6 +871,335 @@ class HomePage extends Component {
 
                 </div>
                 </div>
+                {/* SEO Content Section */}
+                <div className="seo-content-section" style={{ 
+                    padding: '60px 0', 
+                    backgroundColor: '#f8f9fa',
+                    marginTop: '50px'
+                }}>
+                    <div className="container">
+                        <div className="row">
+                            <div className="col-lg-12">
+                                <div className="seo-content-wrapper" style={{
+                                    maxWidth: '900px',
+                                    margin: '0 auto',
+                                    textAlign: 'center'
+                                }}>
+                                    <h1 style={{
+                                        fontSize: '32px',
+                                        fontWeight: '700',
+                                        color: '#333',
+                                        marginBottom: '20px',
+                                        lineHeight: '1.4'
+                                    }}>
+                                        F5 Mart - Cửa Hàng Trực Tuyến Uy Tín Hàng Đầu Việt Nam
+                                    </h1>
+                                    <div style={{
+                                        fontSize: '16px',
+                                        lineHeight: '1.8',
+                                        color: '#555',
+                                        textAlign: 'left',
+                                        marginTop: '30px'
+                                    }}>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            <strong>F5 Mart</strong> là một trong những <strong>cửa hàng trực tuyến</strong> uy tín và chất lượng hàng đầu tại Việt Nam. 
+                                            Chúng tôi chuyên cung cấp các <strong>sản phẩm chất lượng cao</strong> với giá cả hợp lý, đáp ứng mọi nhu cầu mua sắm của khách hàng.
+                                        </p>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Với hệ thống <strong>mua sắm online</strong> hiện đại và tiện lợi, F5 Mart mang đến trải nghiệm <strong>thương mại điện tử</strong> 
+                                            tốt nhất cho người dùng. Khách hàng có thể dễ dàng tìm kiếm và mua các sản phẩm yêu thích từ bất kỳ đâu, 
+                                            bất kỳ lúc nào chỉ với vài cú click chuột.
+                                        </p>
+                                        <h3 style={{
+                                            fontSize: '24px',
+                                            fontWeight: '600',
+                                            color: '#333',
+                                            marginTop: '30px',
+                                            marginBottom: '15px'
+                                        }}>
+                                            Tại Sao Chọn F5 Mart?
+                                        </h3>
+                                        <ul style={{
+                                            listStyle: 'none',
+                                            padding: 0,
+                                            marginBottom: '20px'
+                                        }}>
+                                            <li style={{ marginBottom: '12px', paddingLeft: '25px', position: 'relative' }}>
+                                                <span style={{ position: 'absolute', left: 0, color: '#80b500' }}>✓</span>
+                                                <strong>Giao hàng nhanh chóng:</strong> Hệ thống vận chuyển hiện đại, đảm bảo giao hàng đúng hẹn, 
+                                                an toàn và tiện lợi đến tận tay khách hàng.
+                                            </li>
+                                            <li style={{ marginBottom: '12px', paddingLeft: '25px', position: 'relative' }}>
+                                                <span style={{ position: 'absolute', left: 0, color: '#80b500' }}>✓</span>
+                                                <strong>Thanh toán an toàn:</strong> Hỗ trợ nhiều phương thức thanh toán như COD, PayPal, VNPay 
+                                                với hệ thống bảo mật cao, đảm bảo thông tin khách hàng được bảo vệ tuyệt đối.
+                                            </li>
+                                            <li style={{ marginBottom: '12px', paddingLeft: '25px', position: 'relative' }}>
+                                                <span style={{ position: 'absolute', left: 0, color: '#80b500' }}>✓</span>
+                                                <strong>Sản phẩm đa dạng:</strong> Hàng ngàn sản phẩm từ thực phẩm, đồ uống, rau củ quả tươi ngon 
+                                                đến các mặt hàng tiêu dùng thiết yếu, đáp ứng mọi nhu cầu của gia đình bạn.
+                                            </li>
+                                            <li style={{ marginBottom: '12px', paddingLeft: '25px', position: 'relative' }}>
+                                                <span style={{ position: 'absolute', left: 0, color: '#80b500' }}>✓</span>
+                                                <strong>Giá cả hợp lý:</strong> Cam kết mang đến sản phẩm chất lượng với mức giá tốt nhất thị trường, 
+                                                giúp khách hàng tiết kiệm chi phí mua sắm.
+                                            </li>
+                                            <li style={{ marginBottom: '12px', paddingLeft: '25px', position: 'relative' }}>
+                                                <span style={{ position: 'absolute', left: 0, color: '#80b500' }}>✓</span>
+                                                <strong>Dịch vụ khách hàng chuyên nghiệp:</strong> Đội ngũ tư vấn nhiệt tình, hỗ trợ 24/7, 
+                                                giải đáp mọi thắc mắc và hỗ trợ khách hàng một cách nhanh chóng, hiệu quả.
+                                            </li>
+                                        </ul>
+                                        <p style={{ marginBottom: '20px', marginTop: '30px' }}>
+                                            <strong>Mua hàng online tại F5 Mart</strong> không chỉ tiện lợi mà còn an toàn và đáng tin cậy. 
+                                            Chúng tôi cam kết mang đến cho khách hàng những trải nghiệm <strong>mua sắm trực tuyến</strong> tốt nhất 
+                                            với chất lượng sản phẩm vượt trội và dịch vụ chăm sóc khách hàng tận tâm.
+                                        </p>
+                                        <p style={{ marginBottom: '20px', marginTop: '30px' }}>
+                                            <strong>Mua sắm tại F5 Mart</strong> là lựa chọn thông minh cho mọi gia đình Việt Nam. 
+                                            Chúng tôi không chỉ cung cấp sản phẩm chất lượng mà còn mang đến dịch vụ chăm sóc khách hàng tận tâm, 
+                                            đảm bảo mọi trải nghiệm mua sắm đều trở nên tuyệt vời và đáng nhớ.
+                                        </p>
+                                        <h3 style={{
+                                            fontSize: '24px',
+                                            fontWeight: '600',
+                                            color: '#333',
+                                            marginTop: '30px',
+                                            marginBottom: '15px'
+                                        }}>
+                                            Cam Kết Chất Lượng Từ F5 Mart
+                                        </h3>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Với nhiều năm kinh nghiệm trong lĩnh vực <strong>thương mại điện tử</strong>, F5 Mart tự hào là 
+                                            một trong những <strong>cửa hàng trực tuyến</strong> được tin tưởng nhất tại Việt Nam. 
+                                            Chúng tôi cam kết mang đến cho khách hàng những sản phẩm chính hãng, chất lượng cao với giá cả cạnh tranh nhất thị trường.
+                                        </p>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Hệ thống <strong>mua sắm online</strong> của chúng tôi được xây dựng với công nghệ hiện đại, 
+                                            đảm bảo trải nghiệm mua sắm mượt mà, an toàn và tiện lợi. Khách hàng có thể dễ dàng tìm kiếm sản phẩm, 
+                                            so sánh giá cả và đặt hàng chỉ trong vài phút. Quy trình thanh toán đơn giản với nhiều phương thức như 
+                                            <strong>COD (Thanh toán khi nhận hàng)</strong>, <strong>PayPal</strong>, và <strong>VNPay</strong>, 
+                                            đảm bảo an toàn tuyệt đối cho mọi giao dịch.
+                                        </p>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Đội ngũ nhân viên của F5 Mart luôn sẵn sàng hỗ trợ khách hàng 24/7, giải đáp mọi thắc mắc về sản phẩm, 
+                                            hướng dẫn đặt hàng và xử lý mọi vấn đề phát sinh một cách nhanh chóng, chuyên nghiệp. 
+                                            Chúng tôi hiểu rằng sự hài lòng của khách hàng chính là thành công của chúng tôi.
+                                        </p>
+                                        <p style={{ marginBottom: '20px', marginTop: '30px' }}>
+                                            <strong>F5 Mart</strong> không chỉ là một <strong>cửa hàng trực tuyến</strong> thông thường, 
+                                            mà còn là đối tác tin cậy của hàng ngàn khách hàng trên khắp Việt Nam. 
+                                            Chúng tôi hiểu rằng mỗi sản phẩm bạn mua đều quan trọng, vì vậy chúng tôi luôn đảm bảo 
+                                            chất lượng và dịch vụ tốt nhất có thể.
+                                        </p>
+                                        <h3 style={{
+                                            fontSize: '24px',
+                                            fontWeight: '600',
+                                            color: '#333',
+                                            marginTop: '30px',
+                                            marginBottom: '15px'
+                                        }}>
+                                            Quy Trình Mua Sắm Đơn Giản Và Tiện Lợi
+                                        </h3>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Với <strong>F5 Mart</strong>, việc mua sắm trở nên cực kỳ đơn giản. 
+                                            Chỉ cần vài bước: tìm kiếm sản phẩm yêu thích, thêm vào giỏ hàng, 
+                                            điền thông tin giao hàng và chọn phương thức thanh toán phù hợp. 
+                                            Hệ thống <strong>mua sắm online</strong> của chúng tôi được thiết kế để 
+                                            mang lại trải nghiệm tốt nhất cho người dùng, từ giao diện thân thiện đến 
+                                            quy trình thanh toán an toàn và nhanh chóng.
+                                        </p>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Chúng tôi cung cấp đa dạng các phương thức thanh toán để phù hợp với mọi nhu cầu: 
+                                            <strong>COD (Thanh toán khi nhận hàng)</strong> cho những ai muốn kiểm tra sản phẩm trước, 
+                                            <strong>PayPal</strong> cho khách hàng quốc tế hoặc những ai ưa thích thanh toán online, 
+                                            và <strong>VNPay</strong> - giải pháp thanh toán phổ biến tại Việt Nam. 
+                                            Tất cả đều được bảo mật cao, đảm bảo thông tin tài chính của bạn được bảo vệ tuyệt đối.
+                                        </p>
+                                        <h3 style={{
+                                            fontSize: '24px',
+                                            fontWeight: '600',
+                                            color: '#333',
+                                            marginTop: '30px',
+                                            marginBottom: '15px'
+                                        }}>
+                                            Chính Sách Đổi Trả Và Bảo Hành Linh Hoạt
+                                        </h3>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            <strong>F5 Mart</strong> cam kết mang đến sự hài lòng tuyệt đối cho khách hàng. 
+                                            Nếu bạn không hài lòng với sản phẩm đã mua, chúng tôi có chính sách đổi trả linh hoạt 
+                                            trong vòng 7 ngày kể từ ngày nhận hàng. Đội ngũ chăm sóc khách hàng của chúng tôi 
+                                            luôn sẵn sàng hỗ trợ bạn trong mọi tình huống, đảm bảo mọi vấn đề đều được giải quyết 
+                                            một cách nhanh chóng và thỏa đáng.
+                                        </p>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Với mạng lưới đối tác vận chuyển rộng khắp, <strong>F5 Mart</strong> có thể giao hàng 
+                                            đến mọi tỉnh thành trên cả nước. Thời gian giao hàng thông thường từ 1-3 ngày làm việc, 
+                                            tùy thuộc vào địa điểm nhận hàng. Đối với các đơn hàng trong nội thành, 
+                                            chúng tôi có thể giao hàng trong ngày nếu đặt hàng trước 12 giờ trưa.
+                                        </p>
+                                        <p style={{ marginBottom: '20px', fontStyle: 'italic', color: '#666' }}>
+                                            Hãy khám phá ngay <strong>F5 Mart</strong> - <strong>Shop online uy tín</strong> hàng đầu Việt Nam 
+                                            và trải nghiệm dịch vụ <strong>mua hàng online</strong> chất lượng cao ngay hôm nay! 
+                                            Với hàng ngàn sản phẩm đa dạng, giá cả hợp lý và dịch vụ giao hàng tận nơi, 
+                                            F5 Mart chắc chắn sẽ là điểm đến lý tưởng cho mọi nhu cầu mua sắm của bạn. 
+                                            Đăng ký ngay để nhận các ưu đãi đặc biệt và cập nhật thông tin về sản phẩm mới nhất!
+                                        </p>
+                                        <h3 style={{
+                                            fontSize: '24px',
+                                            fontWeight: '600',
+                                            color: '#333',
+                                            marginTop: '40px',
+                                            marginBottom: '15px'
+                                        }}>
+                                            Danh Mục Sản Phẩm Đa Dạng Tại F5 Mart
+                                        </h3>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            <strong>F5 Mart</strong> tự hào mang đến cho khách hàng một bộ sưu tập sản phẩm phong phú và đa dạng, 
+                                            đáp ứng mọi nhu cầu mua sắm hàng ngày. Từ <strong>thực phẩm tươi sống</strong> đến các mặt hàng 
+                                            <strong>đồ uống</strong>, từ <strong>rau củ quả</strong> tươi ngon đến các sản phẩm <strong>đóng gói</strong>, 
+                                            chúng tôi có tất cả những gì bạn cần cho một bữa ăn ngon miệng và đầy đủ dinh dưỡng.
+                                        </p>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Khi mua sắm tại <strong>F5 Mart</strong>, bạn sẽ được trải nghiệm một không gian <strong>mua sắm online</strong> 
+                                            được tổ chức một cách khoa học và dễ dàng tìm kiếm. Mỗi danh mục sản phẩm đều được phân loại rõ ràng, 
+                                            giúp khách hàng nhanh chóng tìm thấy những gì mình cần. Hệ thống tìm kiếm thông minh của chúng tôi 
+                                            cho phép bạn tìm kiếm sản phẩm theo tên, thương hiệu, giá cả hoặc các tiêu chí khác một cách dễ dàng.
+                                        </p>
+                                        <h3 style={{
+                                            fontSize: '24px',
+                                            fontWeight: '600',
+                                            color: '#333',
+                                            marginTop: '40px',
+                                            marginBottom: '15px'
+                                        }}>
+                                            Lợi Ích Khi Mua Sắm Online Tại F5 Mart
+                                        </h3>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Việc <strong>mua sắm trực tuyến</strong> tại <strong>F5 Mart</strong> mang lại nhiều lợi ích vượt trội 
+                                            so với mua sắm truyền thống. Bạn có thể mua sắm mọi lúc, mọi nơi mà không cần phải di chuyển đến cửa hàng. 
+                                            Điều này đặc biệt tiện lợi trong thời đại công nghệ số hiện nay, khi mọi người đều bận rộn với công việc 
+                                            và cuộc sống hàng ngày.
+                                        </p>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Khi mua sắm tại <strong>F5 Mart</strong>, bạn sẽ tiết kiệm được rất nhiều thời gian và công sức. 
+                                            Thay vì phải đi từ cửa hàng này sang cửa hàng khác để tìm kiếm sản phẩm, bạn chỉ cần ngồi tại nhà, 
+                                            mở website hoặc ứng dụng của chúng tôi và đặt hàng. Sản phẩm sẽ được giao tận nơi một cách nhanh chóng và an toàn.
+                                        </p>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Ngoài ra, <strong>mua hàng online</strong> tại <strong>F5 Mart</strong> còn giúp bạn tiết kiệm chi phí. 
+                                            Chúng tôi thường xuyên có các chương trình khuyến mãi, giảm giá và ưu đãi đặc biệt dành cho khách hàng. 
+                                            Bạn có thể dễ dàng so sánh giá cả giữa các sản phẩm và lựa chọn những sản phẩm phù hợp nhất với ngân sách của mình.
+                                        </p>
+                                        <h3 style={{
+                                            fontSize: '24px',
+                                            fontWeight: '600',
+                                            color: '#333',
+                                            marginTop: '40px',
+                                            marginBottom: '15px'
+                                        }}>
+                                            Hệ Thống Bảo Mật Và An Toàn Thông Tin
+                                        </h3>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            <strong>F5 Mart</strong> hiểu rằng việc bảo vệ thông tin cá nhân và tài chính của khách hàng là vô cùng quan trọng. 
+                                            Chính vì vậy, chúng tôi đã đầu tư vào một hệ thống bảo mật hiện đại, đảm bảo mọi giao dịch đều được mã hóa 
+                                            và bảo vệ an toàn. Khi <strong>mua sắm online</strong> tại <strong>F5 Mart</strong>, bạn có thể hoàn toàn yên tâm 
+                                            về tính bảo mật của thông tin cá nhân và phương thức thanh toán.
+                                        </p>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Hệ thống thanh toán của chúng tôi được tích hợp với các đối tác uy tín như PayPal và VNPay, 
+                                            đảm bảo mọi giao dịch đều được xử lý một cách an toàn và nhanh chóng. Chúng tôi không lưu trữ thông tin 
+                                            thẻ tín dụng của khách hàng, mọi giao dịch đều được xử lý trực tiếp thông qua các cổng thanh toán bảo mật.
+                                        </p>
+                                        <h3 style={{
+                                            fontSize: '24px',
+                                            fontWeight: '600',
+                                            color: '#333',
+                                            marginTop: '40px',
+                                            marginBottom: '15px'
+                                        }}>
+                                            Câu Chuyện Về F5 Mart
+                                        </h3>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            <strong>F5 Mart</strong> được thành lập với sứ mệnh mang đến cho người tiêu dùng Việt Nam một trải nghiệm 
+                                            <strong>mua sắm trực tuyến</strong> tốt nhất. Chúng tôi tin rằng mọi người đều xứng đáng được tiếp cận với 
+                                            những sản phẩm chất lượng cao với giá cả hợp lý, bất kể họ sống ở đâu hay có điều kiện kinh tế như thế nào.
+                                        </p>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Trong suốt quá trình phát triển, <strong>F5 Mart</strong> luôn không ngừng cải thiện dịch vụ và mở rộng danh mục sản phẩm 
+                                            để đáp ứng nhu cầu ngày càng cao của khách hàng. Chúng tôi hợp tác với các nhà cung cấp uy tín, 
+                                            đảm bảo mọi sản phẩm đều được kiểm tra chất lượng kỹ lưỡng trước khi đến tay khách hàng.
+                                        </p>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Đội ngũ nhân viên của <strong>F5 Mart</strong> là những người tận tâm, nhiệt tình và chuyên nghiệp. 
+                                            Họ luôn sẵn sàng lắng nghe phản hồi từ khách hàng và không ngừng cải thiện dịch vụ để mang lại 
+                                            trải nghiệm <strong>mua sắm online</strong> tốt nhất. Chúng tôi tin rằng sự hài lòng của khách hàng 
+                                            chính là động lực để chúng tôi tiếp tục phát triển và hoàn thiện.
+                                        </p>
+                                        <h3 style={{
+                                            fontSize: '24px',
+                                            fontWeight: '600',
+                                            color: '#333',
+                                            marginTop: '40px',
+                                            marginBottom: '15px'
+                                        }}>
+                                            Tại Sao Khách Hàng Tin Tưởng F5 Mart?
+                                        </h3>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            <strong>F5 Mart</strong> đã và đang nhận được sự tin tưởng từ hàng ngàn khách hàng trên khắp Việt Nam. 
+                                            Điều này không chỉ đến từ chất lượng sản phẩm mà còn từ dịch vụ chăm sóc khách hàng tận tâm của chúng tôi. 
+                                            Mỗi đơn hàng đều được xử lý cẩn thận, mỗi khách hàng đều được đối xử với sự tôn trọng và chuyên nghiệp.
+                                        </p>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Chúng tôi cam kết minh bạch trong mọi giao dịch, từ giá cả đến chất lượng sản phẩm. 
+                                            Khách hàng luôn được cung cấp đầy đủ thông tin về sản phẩm, bao gồm nguồn gốc, thành phần, 
+                                            hạn sử dụng và các thông tin quan trọng khác. Điều này giúp khách hàng đưa ra quyết định mua sắm 
+                                            một cách thông minh và tự tin.
+                                        </p>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            <strong>F5 Mart</strong> không chỉ là một <strong>cửa hàng trực tuyến</strong>, mà còn là người bạn đồng hành 
+                                            đáng tin cậy trong cuộc sống hàng ngày của bạn. Chúng tôi hiểu rằng mỗi sản phẩm bạn mua đều có ý nghĩa, 
+                                            và chúng tôi cam kết mang đến những sản phẩm tốt nhất để góp phần làm cho cuộc sống của bạn trở nên tốt đẹp hơn.
+                                        </p>
+                                        <h3 style={{
+                                            fontSize: '24px',
+                                            fontWeight: '600',
+                                            color: '#333',
+                                            marginTop: '40px',
+                                            marginBottom: '15px'
+                                        }}>
+                                            Hướng Dẫn Mua Sắm Tại F5 Mart
+                                        </h3>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Để có trải nghiệm <strong>mua sắm online</strong> tốt nhất tại <strong>F5 Mart</strong>, 
+                                            chúng tôi khuyên bạn nên làm theo các bước sau: Đầu tiên, hãy tạo tài khoản trên website của chúng tôi 
+                                            để nhận được các ưu đãi đặc biệt và cập nhật thông tin về sản phẩm mới. Tiếp theo, bạn có thể duyệt 
+                                            qua các danh mục sản phẩm hoặc sử dụng công cụ tìm kiếm để tìm sản phẩm mình cần.
+                                        </p>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Khi đã tìm thấy sản phẩm yêu thích, hãy xem kỹ thông tin chi tiết về sản phẩm, bao gồm mô tả, 
+                                            hình ảnh, giá cả và các đánh giá từ khách hàng khác. Sau đó, bạn có thể thêm sản phẩm vào giỏ hàng 
+                                            và tiếp tục mua sắm hoặc tiến hành thanh toán ngay. Trong quá trình thanh toán, bạn sẽ được yêu cầu 
+                                            nhập thông tin giao hàng và chọn phương thức thanh toán phù hợp.
+                                        </p>
+                                        <p style={{ marginBottom: '20px' }}>
+                                            Sau khi đặt hàng thành công, bạn sẽ nhận được email xác nhận đơn hàng. Chúng tôi sẽ xử lý đơn hàng 
+                                            và giao hàng đến địa chỉ bạn đã cung cấp trong thời gian sớm nhất. Bạn có thể theo dõi trạng thái 
+                                            đơn hàng thông qua tài khoản của mình hoặc liên hệ với bộ phận chăm sóc khách hàng nếu có bất kỳ thắc mắc nào.
+                                        </p>
+                                        <p style={{ marginBottom: '0', fontStyle: 'italic', color: '#666', marginTop: '30px' }}>
+                                            Hãy bắt đầu hành trình <strong>mua sắm trực tuyến</strong> của bạn ngay hôm nay với <strong>F5 Mart</strong>! 
+                                            Chúng tôi cam kết mang đến cho bạn những trải nghiệm tuyệt vời nhất với sản phẩm chất lượng, 
+                                            giá cả hợp lý và dịch vụ chăm sóc khách hàng tận tâm. Đăng ký ngay để nhận các ưu đãi đặc biệt 
+                                            và trở thành một phần của cộng đồng khách hàng hài lòng của <strong>F5 Mart</strong>!
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <Footer />
             </>
 
