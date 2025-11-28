@@ -62,7 +62,19 @@ export const createAbsoluteImageUrl = (imagePath) => {
         return imagePath;
     }
     
-    // Tạo absolute URL
+    // Kiểm tra xem có phải là đường dẫn từ backend không
+    // Backend thường lưu ảnh ở /uploads/, /images/, /public/, /static/
+    const backendImagePaths = ['/uploads/', '/images/', '/public/', '/static/', '/assets/'];
+    const isBackendImage = backendImagePaths.some(path => imagePath.startsWith(path));
+    
+    if (isBackendImage) {
+        // Ảnh từ backend, sử dụng backend URL
+        const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8080';
+        const normalizedPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+        return `${backendUrl}${normalizedPath}`;
+    }
+    
+    // Ảnh từ frontend (public folder), sử dụng frontend URL
     const baseUrl = getBaseUrl();
     const normalizedPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
     
